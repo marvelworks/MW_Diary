@@ -1,16 +1,34 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import DiaryForm from '@/components/DiaryForm'
 import DiaryList from '@/components/DiaryList'
 import NameSetup from '@/components/NameSetup'
 import type { CurrentUser } from '@/lib/auth'
+
+type ThemeMode = 'light' | 'dark'
 
 export default function HomeClient({ currentUser }: { currentUser: CurrentUser }) {
   const [profile, setProfile] = useState(currentUser)
   const [showNameSetup, setShowNameSetup] = useState(false)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [theme, setTheme] = useState<ThemeMode>(() => {
+    if (typeof window === 'undefined') {
+      return 'light'
+    }
+    return window.localStorage.getItem('mw-diary-theme') === 'dark' ? 'dark' : 'light'
+  })
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+  }, [theme])
+
+  const applyTheme = (nextTheme: ThemeMode) => {
+    setTheme(nextTheme)
+    document.documentElement.dataset.theme = nextTheme
+    window.localStorage.setItem('mw-diary-theme', nextTheme)
+  }
 
   const handlePostSuccess = () => {
     setRefreshTrigger((prev) => prev + 1)
@@ -40,6 +58,22 @@ export default function HomeClient({ currentUser }: { currentUser: CurrentUser }
                 ? 'LINE通知は有効です'
                 : 'LINE通知を受けるには公式アカウントを友だち追加してください'}
             </span>
+            <div className="theme-switch" role="group" aria-label="テーマ切り替え">
+              <button
+                type="button"
+                className={`theme-option${theme === 'light' ? ' is-selected' : ''}`}
+                onClick={() => applyTheme('light')}
+              >
+                Light
+              </button>
+              <button
+                type="button"
+                className={`theme-option${theme === 'dark' ? ' is-selected' : ''}`}
+                onClick={() => applyTheme('dark')}
+              >
+                Dark
+              </button>
+            </div>
             <div className="hero-actions">
               <button className="ghost-button" onClick={() => setShowNameSetup(true)}>
                 表示名を変更

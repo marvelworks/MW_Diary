@@ -13,6 +13,19 @@
   --shadow: 0 24px 60px rgba(65, 38, 23, 0.12);
 }
 
+:root[data-theme='dark'] {
+  --background: #171312;
+  --foreground: #f8efe8;
+  --surface: rgba(40, 29, 27, 0.9);
+  --surface-strong: #251a18;
+  --border: rgba(255, 220, 200, 0.12);
+  --muted: #d2b8a7;
+  --primary: #ff9868;
+  --primary-strong: #ffd2be;
+  --primary-soft: rgba(255, 152, 104, 0.14);
+  --shadow: 0 30px 70px rgba(0, 0, 0, 0.35);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -210,6 +223,16 @@ textarea {
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.78);
   color: var(--foreground);
+}
+
+:root[data-theme='dark'] .ghost-button,
+:root[data-theme='dark'] .tag-pill,
+:root[data-theme='dark'] .reaction-chip,
+:root[data-theme='dark'] .icon-button,
+:root[data-theme='dark'] input,
+:root[data-theme='dark'] textarea,
+:root[data-theme='dark'] .reaction-panel {
+  background: rgba(31, 24, 23, 0.92);
 }
 
 .danger-button {
@@ -424,6 +447,33 @@ textarea {
   color: #a13232;
   font-size: 14px;
   font-weight: 600;
+}
+
+.theme-switch {
+  display: inline-flex;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--border);
+}
+
+.theme-option {
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 8px 14px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.theme-option.is-selected {
+  background: var(--foreground);
+  color: var(--background);
+}
+
+:root[data-theme='dark'] .theme-switch {
+  background: rgba(31, 24, 23, 0.92);
 }
 
 @media (max-width: 720px) {

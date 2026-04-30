@@ -191,7 +191,37 @@ export default function DiaryList({
 
     if (!response.ok) {
       setError('リアクションの更新に失敗しました。')
+      return
     }
+
+    const result = (await response.json()) as { liked?: boolean }
+    const normalizedEmoji = emoji.trim()
+
+    setLikes((prev) => {
+      const withoutTarget = prev.filter(
+        (like) =>
+          !(
+            like.entry_id === entryId &&
+            like.user_name === userName &&
+            like.emoji === normalizedEmoji
+          )
+      )
+
+      if (!result.liked) {
+        return withoutTarget
+      }
+
+      return [
+        ...withoutTarget,
+        {
+          id: `local-${entryId}-${normalizedEmoji}-${userName}`,
+          entry_id: entryId,
+          user_name: userName,
+          emoji: normalizedEmoji,
+          created_at: new Date().toISOString(),
+        },
+      ]
+    })
   }
 
   const customEmoji = (entryId: string) => customEmojiByEntry[entryId] ?? ''
@@ -232,7 +262,7 @@ export default function DiaryList({
       {error && <p className="message-error">{error}</p>}
 
       <div className="entry-list">
-      {entries.map((entry) => {
+        {entries.map((entry) => {
         const isOwn = entry.author_name === userName
         const isEditing = editingId === entry.id
         const isLoading = loadingId === entry.id
@@ -242,8 +272,8 @@ export default function DiaryList({
           return acc
         }, {} as Record<string, number>)
 
-        return (
-          <article key={entry.id} className="entry-card">
+          return (
+            <article key={entry.id} className="entry-card">
             <div className="entry-header">
               <div className="entry-author">
                 {userAvatars[entry.author_name] ? (
@@ -284,35 +314,35 @@ export default function DiaryList({
             )}
 
             <div style={{ marginTop: 18 }}>
-              <div className="reaction-row">
-                {Object.entries(likeCounts).map(([emoji, count]) => {
-                  const hasLiked = likes.some(
-                    (like) => like.entry_id === entry.id && like.user_name === userName && like.emoji === emoji
-                  )
-                  return (
-                    <button
-                      key={emoji}
-                      onClick={() => toggleLike(entry.id, emoji)}
-                      className={`reaction-chip${hasLiked ? ' is-active' : ''}`}
-                    >
-                      <span>{emoji}</span>
-                      <span>{count}</span>
-                    </button>
-                  )
-                })}
+                <div className="reaction-row">
+                  {Object.entries(likeCounts).map(([emoji, count]) => {
+                    const hasLiked = likes.some(
+                      (like) => like.entry_id === entry.id && like.user_name === userName && like.emoji === emoji
+                    )
+                    return (
+                      <button
+                        key={emoji}
+                        onClick={() => toggleLike(entry.id, emoji)}
+                        className={`reaction-chip${hasLiked ? ' is-active' : ''}`}
+                      >
+                        <span>{emoji}</span>
+                        <span>{count}</span>
+                      </button>
+                    )
+                  })}
 
-                <button
-                  type="button"
-                  className="icon-button"
-                  onClick={() =>
-                    setActiveReactionEntryId((prev) => (prev === entry.id ? null : entry.id))
-                  }
-                  aria-label="リアクションを追加"
-                  title="リアクションを追加"
-                >
-                  +
-                </button>
-              </div>
+                  <button
+                    type="button"
+                    className="icon-button"
+                    onClick={() =>
+                      setActiveReactionEntryId((prev) => (prev === entry.id ? null : entry.id))
+                    }
+                    aria-label="リアクションを追加"
+                    title="リアクションを追加"
+                  >
+                    +
+                  </button>
+                </div>
 
               {activeReactionEntryId === entry.id && (
                 <div className="reaction-panel">
@@ -361,32 +391,32 @@ export default function DiaryList({
               )}
             </div>
 
-            {isOwn && (
-              <div className="entry-actions">
-                {isEditing ? (
-                  <>
-                    <button onClick={() => saveEntry(entry.id)} disabled={isLoading} className="primary-button">
-                      {isLoading ? '保存中...' : '保存する'}
-                    </button>
-                    <button onClick={cancelEditing} disabled={isLoading} className="ghost-button">
-                      キャンセル
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button onClick={() => startEditing(entry)} disabled={isLoading} className="ghost-button">
-                      編集する
-                    </button>
-                    <button onClick={() => deleteEntry(entry.id)} disabled={isLoading} className="danger-button">
-                      削除する
-                    </button>
-                  </>
-                )}
-              </div>
-            )}
-          </article>
-        )
-      })}
+              {isOwn && (
+                <div className="entry-actions">
+                  {isEditing ? (
+                    <>
+                      <button onClick={() => saveEntry(entry.id)} disabled={isLoading} className="primary-button">
+                        {isLoading ? '保存中...' : '保存する'}
+                      </button>
+                      <button onClick={cancelEditing} disabled={isLoading} className="ghost-button">
+                        キャンセル
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button onClick={() => startEditing(entry)} disabled={isLoading} className="ghost-button">
+                        編集する
+                      </button>
+                      <button onClick={() => deleteEntry(entry.id)} disabled={isLoading} className="danger-button">
+                        削除する
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+            </article>
+          )
+        })}
       </div>
     </section>
   )
