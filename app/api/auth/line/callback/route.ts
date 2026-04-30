@@ -36,6 +36,8 @@ export async function GET(request: NextRequest) {
     getLineFriendship(tokenData.access_token),
   ])
 
+  // Keep the upsert payload explicitly typed so production builds
+  // don't infer Supabase table inserts as `never`.
   const usersTable = getSupabaseAdmin().from('users') as unknown as {
     upsert: (
       values: UserUpsertPayload,
