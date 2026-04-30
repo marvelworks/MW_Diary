@@ -4,6 +4,14 @@ import { createSession } from '@/lib/session'
 import { exchangeLineCode, getLineFriendship, getLineProfile } from '@/lib/line'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
+type UserUpsertPayload = {
+  line_user_id: string
+  name: string
+  avatar_url: string | null
+  line_friendship_status: 'friend' | 'not_friend'
+  notifications_enabled: boolean
+}
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const code = searchParams.get('code')
@@ -28,7 +36,14 @@ export async function GET(request: NextRequest) {
     getLineFriendship(tokenData.access_token),
   ])
 
-  await getSupabaseAdmin().from('users').upsert(
+  const usersTable = getSupabaseAdmin().from('users') as unknown as {
+    upsert: (
+      values: UserUpsertPayload,
+      options?: { onConflict?: string }
+    ) => Promise<unknown>
+  }
+
+  await usersTable.upsert(
     {
       line_user_id: profile.userId,
       name: profile.displayName,
