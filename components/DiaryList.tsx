@@ -20,6 +20,11 @@ type Like = {
   created_at: string
 }
 
+type UserAvatarRow = {
+  name: string
+  avatar_url: string | null
+}
+
 export default function DiaryList({
   userName,
   refreshTrigger,
@@ -40,19 +45,19 @@ export default function DiaryList({
   useEffect(() => {
     const fetchEntries = async () => {
       const { data } = await supabase.from('entries').select('*').order('created_at', { ascending: false })
-      if (data) setEntries(data)
+      if (data) setEntries(data as Entry[])
     }
 
     const fetchLikes = async () => {
       const { data } = await supabase.from('likes').select('*')
-      if (data) setLikes(data)
+      if (data) setLikes(data as Like[])
     }
 
     const fetchUserAvatars = async () => {
       const { data } = await supabase.from('users').select('name, avatar_url')
       if (data) {
         const avatarMap: Record<string, string> = {}
-        data.forEach((user) => {
+        ;(data as UserAvatarRow[]).forEach((user) => {
           if (user.avatar_url) avatarMap[user.name] = user.avatar_url
         })
         setUserAvatars(avatarMap)
@@ -97,7 +102,7 @@ export default function DiaryList({
     if (refreshTrigger && refreshTrigger > 0) {
       const fetchLatest = async () => {
         const { data } = await supabase.from('entries').select('*').order('created_at', { ascending: false })
-        if (data) setEntries(data)
+        if (data) setEntries(data as Entry[])
       }
       fetchLatest()
     }
@@ -148,7 +153,7 @@ export default function DiaryList({
 
   const refreshEntries = async () => {
     const { data } = await supabase.from('entries').select('*').order('created_at', { ascending: false })
-    if (data) setEntries(data)
+    if (data) setEntries(data as Entry[])
   }
 
   const deleteEntry = async (id: string) => {
