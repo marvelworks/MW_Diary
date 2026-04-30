@@ -78,27 +78,36 @@ export default function DiaryForm({
   }
 
   return (
-    <div style={{ margin: '16px 0' }}>
-      <p style={{ marginBottom: 8, color: '#475569', fontSize: '14px' }}>
-        {userName}さんとして投稿します。
-      </p>
+    <section className="surface-card">
+      <div className="composer-header">
+        <div>
+          <p className="eyebrow" style={{ marginBottom: 8 }}>
+            New Entry
+          </p>
+          <h2 className="section-title">今日の日記を書く</h2>
+          <p className="section-copy">
+            {userName}さんとして投稿します。タイトルはなくても大丈夫です。本文が主役なので、気軽に書いてください。
+          </p>
+        </div>
+        <span className="tag-pill">スマホでも入力しやすい大きめUI</span>
+      </div>
 
-      <input
-        value={title}
-        onChange={(event) => setTitle(event.target.value)}
-        placeholder="タイトル（任意）"
-        style={{ width: '100%', padding: 8, borderRadius: 8, border: '1px solid #ddd', marginBottom: 8 }}
-      />
+      <div className="section-stack">
+        <input
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          placeholder="タイトルをつけるならここ"
+        />
 
-      <textarea
-        value={body}
-        onChange={(event) => setBody(event.target.value)}
-        placeholder="今日はどんな一日でしたか？"
-        rows={4}
-        style={{ width: '100%', padding: 8, borderRadius: 8, border: '1px solid #ddd' }}
-      />
+        <textarea
+          value={body}
+          onChange={(event) => setBody(event.target.value)}
+          placeholder="今日はどんな一日でしたか？ ひとことでも大丈夫。"
+          rows={6}
+        />
+      </div>
 
-      <div style={{ marginTop: 8 }}>
+      <div className="toolbar-row" style={{ marginTop: 14 }}>
         <input
           ref={fileInputRef}
           type="file"
@@ -109,9 +118,9 @@ export default function DiaryForm({
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          style={{ fontSize: '14px', padding: '4px 8px', marginRight: 8 }}
+          className="ghost-button"
         >
-          写真を添付
+          写真を添付する
         </button>
         {imagePreview && (
           <button
@@ -120,28 +129,29 @@ export default function DiaryForm({
               setImageFile(null)
               setImagePreview(null)
             }}
-            style={{ fontSize: '14px', padding: '4px 8px', color: '#f00' }}
+            className="danger-button"
           >
-            削除
+            添付を外す
           </button>
         )}
       </div>
 
       {imagePreview && (
-        <div style={{ marginTop: 8 }}>
-          <img
-            src={imagePreview}
-            alt="プレビュー"
-            style={{ maxWidth: '200px', maxHeight: '200px', borderRadius: 8 }}
-          />
+        <div className="file-preview">
+          <img src={imagePreview} alt="プレビュー" />
         </div>
       )}
 
-      {error && <p style={{ color: '#b91c1c', fontSize: '14px' }}>{error}</p>}
+      {error && <p className="message-error" style={{ marginTop: 12 }}>{error}</p>}
 
-      <button onClick={handleSubmit} disabled={loading} style={{ marginTop: 8 }}>
-        {loading ? '投稿中...' : '投稿する'}
+      <button
+        onClick={handleSubmit}
+        disabled={loading}
+        className="primary-button"
+        style={{ marginTop: 18, width: '100%', minHeight: 54, fontSize: '16px' }}
+      >
+        {loading ? '投稿中...' : '✍️ 日記を投稿する'}
       </button>
-    </div>
+    </section>
   )
 }

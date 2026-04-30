@@ -23,56 +23,34 @@ export default function HomeClient({ currentUser }: { currentUser: CurrentUser }
   }
 
   return (
-    <div style={{ maxWidth: 680, margin: '0 auto', padding: '1rem 1rem 3rem' }}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '1rem',
-          gap: '12px',
-          flexWrap: 'wrap',
-        }}
-      >
-        <div>
-          <h1 style={{ margin: 0 }}>こうかんにっき</h1>
-          <p style={{ margin: '6px 0 0', color: '#64748b', fontSize: '14px' }}>
-            {profile.friendshipStatus === 'friend'
-              ? 'LINE通知は有効です'
-              : 'LINE通知を受けるには公式アカウントを友だち追加してください'}
-          </p>
-        </div>
+    <main className="app-shell section-stack">
+      <section className="hero-card">
+        <div className="hero-layout">
+          <div>
+            <p className="eyebrow">Family Diary</p>
+            <h1 className="hero-title">こうかんにっき</h1>
+            <p className="hero-copy">
+              家族の近況を、やさしく回していくための交換日記です。スマホで書きやすく、あとから読み返しても気持ちが残る見た目に整えています。
+            </p>
+          </div>
 
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button
-            onClick={() => setShowNameSetup(true)}
-            style={{
-              fontSize: '14px',
-              padding: '8px 12px',
-              border: '1px solid #ddd',
-              borderRadius: '999px',
-              background: 'white',
-              cursor: 'pointer',
-            }}
-          >
-            表示名を変更
-          </button>
-          <button
-            onClick={handleLogout}
-            disabled={isLoggingOut}
-            style={{
-              fontSize: '14px',
-              padding: '8px 12px',
-              border: '1px solid #ddd',
-              borderRadius: '999px',
-              background: 'white',
-              cursor: isLoggingOut ? 'wait' : 'pointer',
-            }}
-          >
-            {isLoggingOut ? 'ログアウト中...' : 'ログアウト'}
-          </button>
+          <div className="section-stack" style={{ minWidth: 'min(100%, 240px)' }}>
+            <span className="status-pill">
+              {profile.friendshipStatus === 'friend'
+                ? 'LINE通知は有効です'
+                : 'LINE通知を受けるには公式アカウントを友だち追加してください'}
+            </span>
+            <div className="hero-actions">
+              <button className="ghost-button" onClick={() => setShowNameSetup(true)}>
+                表示名を変更
+              </button>
+              <button className="danger-button" onClick={handleLogout} disabled={isLoggingOut}>
+                {isLoggingOut ? 'ログアウト中...' : 'ログアウト'}
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
       {showNameSetup && (
         <NameSetup
@@ -85,9 +63,31 @@ export default function HomeClient({ currentUser }: { currentUser: CurrentUser }
         />
       )}
 
-      <p>{profile.name}さん、こんにちは！</p>
+      <section className="greeting-card">
+        <div>
+          <p className="eyebrow" style={{ marginBottom: 8 }}>
+            Welcome Back
+          </p>
+          <h2 className="greeting-title">{profile.name}さん、こんにちは！</h2>
+          <p className="greeting-copy">
+            今日のことをひとことでも残しておくと、次の人が返事しやすくなります。写真つきでも、短いメモだけでも大丈夫です。
+          </p>
+        </div>
+        <div className="avatar-badge" aria-hidden="true">
+          {profile.avatarUrl ? (
+            <img
+              src={profile.avatarUrl}
+              alt=""
+              style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '22px' }}
+            />
+          ) : (
+            profile.name.slice(0, 1)
+          )}
+        </div>
+      </section>
+
       <DiaryForm userName={profile.name} onPostSuccess={handlePostSuccess} />
       <DiaryList userName={profile.name} refreshTrigger={refreshTrigger} />
-    </div>
+    </main>
   )
 }

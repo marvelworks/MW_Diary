@@ -38,9 +38,11 @@ export default function DiaryList({
   const [editingTitle, setEditingTitle] = useState('')
   const [editingBody, setEditingBody] = useState('')
   const [loadingId, setLoadingId] = useState<string | null>(null)
-  const [customEmoji, setCustomEmoji] = useState('')
+  const [activeReactionEntryId, setActiveReactionEntryId] = useState<string | null>(null)
+  const [customEmojiByEntry, setCustomEmojiByEntry] = useState<Record<string, string>>({})
   const [userAvatars, setUserAvatars] = useState<Record<string, string>>({})
   const [error, setError] = useState<string | null>(null)
+  const quickReactions = ['👍', '❤️', '😊', '🎉', '😢', '😮', '🔥', '💯']
 
   useEffect(() => {
     const fetchEntries = async () => {
@@ -192,42 +194,44 @@ export default function DiaryList({
     }
   }
 
+  const customEmoji = (entryId: string) => customEmojiByEntry[entryId] ?? ''
+
+  const setCustomEmoji = (entryId: string, value: string) => {
+    setCustomEmojiByEntry((prev) => ({ ...prev, [entryId]: value }))
+  }
+
   return (
-    <div>
+    <section className="section-stack">
+      <div>
+        <p className="eyebrow" style={{ marginBottom: 8 }}>
+          Timeline
+        </p>
+        <h2 className="section-title">みんなの日記</h2>
+        <p className="section-copy">新しい投稿から順番に並びます。リアクションは押した瞬間に反映されます。</p>
+      </div>
+
       {entries.length > 0 && (
-        <div
-          style={{
-            background: '#f0f8ff',
-            padding: '12px',
-            borderRadius: '8px',
-            marginBottom: '16px',
-            textAlign: 'center',
-            border: '1px solid #e0f0ff',
-          }}
-        >
-          <p style={{ margin: 0, fontWeight: 'bold' }}>次は {entries[0].author_name} さんの番です！</p>
-          <p style={{ margin: '4px 0 0', fontSize: '14px', color: '#666' }}>
-            最新の投稿: {new Date(entries[0].created_at).toLocaleString('ja-JP')}
-          </p>
-          <button
-            onClick={refreshEntries}
-            style={{
-              marginTop: '8px',
-              padding: '4px 12px',
-              fontSize: '12px',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              background: 'white',
-              cursor: 'pointer',
-            }}
-          >
+        <div className="turn-card">
+          <div>
+            <p className="eyebrow" style={{ marginBottom: 6 }}>
+              Next Turn
+            </p>
+            <p style={{ margin: 0, fontSize: '22px', fontWeight: 800 }}>
+              次は {entries[0].author_name} さんの番です！
+            </p>
+            <p className="section-copy" style={{ marginTop: 6 }}>
+              最新の投稿: {new Date(entries[0].created_at).toLocaleString('ja-JP')}
+            </p>
+          </div>
+          <button onClick={refreshEntries} className="ghost-button">
             最新情報を取得
           </button>
         </div>
       )}
 
-      {error && <p style={{ color: '#b91c1c', fontSize: '14px' }}>{error}</p>}
+      {error && <p className="message-error">{error}</p>}
 
+      <div className="entry-list">
       {entries.map((entry) => {
         const isOwn = entry.author_name === userName
         const isEditing = editingId === entry.id
@@ -239,71 +243,49 @@ export default function DiaryList({
         }, {} as Record<string, number>)
 
         return (
-          <div
-            key={entry.id}
-            style={{ border: '1px solid #eee', borderRadius: 8, padding: 16, margin: '8px 0' }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-              {userAvatars[entry.author_name] ? (
-                <img
-                  src={userAvatars[entry.author_name]}
-                  alt={`${entry.author_name}のアバター`}
-                  style={{
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '50%',
-                    marginRight: '8px',
-                    objectFit: 'cover',
-                  }}
-                />
-              ) : null}
-              <p style={{ fontWeight: 500, margin: 0 }}>{entry.author_name}</p>
+          <article key={entry.id} className="entry-card">
+            <div className="entry-header">
+              <div className="entry-author">
+                {userAvatars[entry.author_name] ? (
+                  <img
+                    src={userAvatars[entry.author_name]}
+                    alt={`${entry.author_name}のアバター`}
+                    className="entry-avatar"
+                  />
+                ) : (
+                  <div className="avatar-badge" style={{ width: 44, height: 44, borderRadius: 16, fontSize: 16 }}>
+                    {entry.author_name.slice(0, 1)}
+                  </div>
+                )}
+                <div>
+                  <p style={{ fontWeight: 700, margin: 0 }}>{entry.author_name}</p>
+                  <p className="entry-meta">{new Date(entry.created_at).toLocaleString('ja-JP')}</p>
+                </div>
+              </div>
+
+              {isOwn ? <span className="tag-pill">あなたの投稿</span> : null}
             </div>
 
             {isEditing ? (
-              <>
+              <div className="section-stack">
                 <input
                   value={editingTitle}
                   onChange={(event) => setEditingTitle(event.target.value)}
                   placeholder="タイトル（任意）"
-                  style={{ width: '100%', padding: 8, borderRadius: 8, border: '1px solid #ddd', marginBottom: 8 }}
                 />
-                <textarea
-                  value={editingBody}
-                  onChange={(event) => setEditingBody(event.target.value)}
-                  rows={4}
-                  style={{ width: '100%', padding: 8, borderRadius: 8, border: '1px solid #ddd' }}
-                />
-              </>
+                <textarea value={editingBody} onChange={(event) => setEditingBody(event.target.value)} rows={5} />
+              </div>
             ) : (
               <>
-                {entry.title && (
-                  <h3 style={{ margin: '8px 0', fontSize: '1.2em', fontWeight: 'bold' }}>{entry.title}</h3>
-                )}
-                <p>{entry.body}</p>
-                {entry.image_url && (
-                  <div style={{ marginTop: 8 }}>
-                    <img
-                      src={entry.image_url}
-                      alt="添付画像"
-                      style={{
-                        maxWidth: '100%',
-                        maxHeight: '300px',
-                        borderRadius: 8,
-                        border: '1px solid #eee',
-                      }}
-                    />
-                  </div>
-                )}
+                {entry.title && <h3 className="entry-title">{entry.title}</h3>}
+                <p className="entry-body">{entry.body}</p>
+                {entry.image_url && <img src={entry.image_url} alt="添付画像" className="entry-image" />}
               </>
             )}
 
-            <p style={{ fontSize: 12, color: '#999' }}>{new Date(entry.created_at).toLocaleString('ja-JP')}</p>
-
-            <div style={{ marginTop: 8 }}>
-              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 8 }}>
-                {['👍', '❤️', '😊', '🎉', '😢', '😮', '🔥', '💯'].map((emoji) => {
-                  const count = likeCounts[emoji] || 0
+            <div style={{ marginTop: 18 }}>
+              <div className="reaction-row">
+                {Object.entries(likeCounts).map(([emoji, count]) => {
                   const hasLiked = likes.some(
                     (like) => like.entry_id === entry.id && like.user_name === userName && like.emoji === emoji
                   )
@@ -311,107 +293,101 @@ export default function DiaryList({
                     <button
                       key={emoji}
                       onClick={() => toggleLike(entry.id, emoji)}
-                      style={{
-                        padding: '4px 8px',
-                        borderRadius: 16,
-                        border: hasLiked ? '1px solid #007bff' : '1px solid #ddd',
-                        background: hasLiked ? '#e7f3ff' : 'white',
-                        cursor: 'pointer',
-                        fontSize: '14px',
-                      }}
+                      className={`reaction-chip${hasLiked ? ' is-active' : ''}`}
                     >
-                      {emoji} {count > 0 && count}
+                      <span>{emoji}</span>
+                      <span>{count}</span>
                     </button>
                   )
                 })}
-              </div>
 
-              <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                <input
-                  type="text"
-                  value={customEmoji}
-                  onChange={(event) => setCustomEmoji(event.target.value)}
-                  placeholder="絵文字を入力"
-                  style={{
-                    padding: '4px 8px',
-                    borderRadius: 8,
-                    border: '1px solid #ddd',
-                    fontSize: '14px',
-                    width: '100px',
-                  }}
-                  maxLength={2}
-                />
                 <button
-                  onClick={() => {
-                    toggleLike(entry.id, customEmoji)
-                    setCustomEmoji('')
-                  }}
-                  disabled={!customEmoji.trim()}
-                  style={{
-                    padding: '4px 8px',
-                    borderRadius: 8,
-                    border: '1px solid #ddd',
-                    background: 'white',
-                    cursor: customEmoji.trim() ? 'pointer' : 'not-allowed',
-                    fontSize: '14px',
-                  }}
+                  type="button"
+                  className="icon-button"
+                  onClick={() =>
+                    setActiveReactionEntryId((prev) => (prev === entry.id ? null : entry.id))
+                  }
+                  aria-label="リアクションを追加"
+                  title="リアクションを追加"
                 >
-                  追加
+                  +
                 </button>
               </div>
 
-              {Object.entries(likeCounts)
-                .filter(([emoji]) => !['👍', '❤️', '😊', '🎉', '😢', '😮', '🔥', '💯'].includes(emoji))
-                .map(([emoji, count]) => {
-                  const hasLiked = likes.some(
-                    (like) => like.entry_id === entry.id && like.user_name === userName && like.emoji === emoji
-                  )
-                  return (
+              {activeReactionEntryId === entry.id && (
+                <div className="reaction-panel">
+                  <div>
+                    <p className="eyebrow" style={{ marginBottom: 8 }}>
+                      Add Reaction
+                    </p>
+                    <div className="reaction-grid">
+                      {quickReactions.map((emoji) => (
+                        <button
+                          key={emoji}
+                          type="button"
+                          className="reaction-chip"
+                          onClick={() => {
+                            toggleLike(entry.id, emoji)
+                            setActiveReactionEntryId(null)
+                          }}
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="toolbar-row">
+                    <input
+                      type="text"
+                      value={customEmoji(entry.id)}
+                      onChange={(event) => setCustomEmoji(entry.id, event.target.value)}
+                      placeholder="好きな絵文字を入力"
+                      maxLength={2}
+                    />
                     <button
-                      key={emoji}
-                      onClick={() => toggleLike(entry.id, emoji)}
-                      style={{
-                        margin: '2px',
-                        padding: '2px 6px',
-                        borderRadius: 12,
-                        border: hasLiked ? '1px solid #007bff' : '1px solid #ddd',
-                        background: hasLiked ? '#e7f3ff' : 'white',
-                        cursor: 'pointer',
-                        fontSize: '12px',
+                      className="primary-button"
+                      onClick={() => {
+                        toggleLike(entry.id, customEmoji(entry.id))
+                        setCustomEmoji(entry.id, '')
+                        setActiveReactionEntryId(null)
                       }}
+                      disabled={!customEmoji(entry.id).trim()}
                     >
-                      {emoji} {count}
+                      追加
                     </button>
-                  )
-                })}
+                  </div>
+                </div>
+              )}
             </div>
 
             {isOwn && (
-              <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <div className="entry-actions">
                 {isEditing ? (
                   <>
-                    <button onClick={() => saveEntry(entry.id)} disabled={isLoading}>
-                      {isLoading ? '保存中...' : '保存'}
+                    <button onClick={() => saveEntry(entry.id)} disabled={isLoading} className="primary-button">
+                      {isLoading ? '保存中...' : '保存する'}
                     </button>
-                    <button onClick={cancelEditing} disabled={isLoading}>
+                    <button onClick={cancelEditing} disabled={isLoading} className="ghost-button">
                       キャンセル
                     </button>
                   </>
                 ) : (
                   <>
-                    <button onClick={() => startEditing(entry)} disabled={isLoading}>
-                      編集
+                    <button onClick={() => startEditing(entry)} disabled={isLoading} className="ghost-button">
+                      編集する
                     </button>
-                    <button onClick={() => deleteEntry(entry.id)} disabled={isLoading}>
-                      削除
+                    <button onClick={() => deleteEntry(entry.id)} disabled={isLoading} className="danger-button">
+                      削除する
                     </button>
                   </>
                 )}
               </div>
             )}
-          </div>
+          </article>
         )
       })}
-    </div>
+      </div>
+    </section>
   )
 }
