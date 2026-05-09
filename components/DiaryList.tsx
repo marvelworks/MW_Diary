@@ -233,14 +233,6 @@ export default function DiaryList({
 
   return (
     <section className="section-stack">
-      <div>
-        <p className="eyebrow" style={{ marginBottom: 8 }}>
-          Timeline
-        </p>
-        <h2 className="section-title">みんなの日記</h2>
-        <p className="section-copy">新しい投稿から順番に並びます。リアクションは押した瞬間に反映されます。</p>
-      </div>
-
       {entries.length > 0 && (
         <div className="turn-card">
           <div>
@@ -261,6 +253,10 @@ export default function DiaryList({
       )}
 
       {error && <p className="message-error">{error}</p>}
+
+      <div className="list-heading">
+        <h2 className="section-title">TIMELINE</h2>
+      </div>
 
       <div className="entry-list">
         {entries.map((entry) => {

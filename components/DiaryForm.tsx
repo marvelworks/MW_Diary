@@ -4,10 +4,8 @@ import { useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 
 export default function DiaryForm({
-  userName,
   onPostSuccess,
 }: {
-  userName: string
   onPostSuccess?: () => void
 }) {
   const [title, setTitle] = useState('')
@@ -82,23 +80,14 @@ export default function DiaryForm({
   return (
     <section className="surface-card">
       <div className="composer-header">
-        <div>
-          <p className="eyebrow" style={{ marginBottom: 8 }}>
-            New Entry
-          </p>
-          <h2 className="section-title">今日の日記を書く</h2>
-          <p className="section-copy">
-            {userName}さんとして投稿します。タイトルはなくても大丈夫です。本文が主役なので、気軽に書いてください。
-          </p>
-        </div>
-        <span className="tag-pill">スマホでも入力しやすい大きめUI</span>
+        <h2 className="section-title">NEW ENTRY</h2>
       </div>
 
       <div className="section-stack">
         <input
           value={title}
           onChange={(event) => setTitle(event.target.value)}
-          placeholder="タイトルをつけるならここ"
+          placeholder="タイトル（任意）"
         />
 
         <textarea
@@ -120,9 +109,11 @@ export default function DiaryForm({
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="ghost-button"
+          className="attach-circle"
+          aria-label="写真を添付する"
+          title="写真を添付する"
         >
-          写真を添付する
+          +
         </button>
         {imagePreview && (
           <button
@@ -185,10 +176,10 @@ export default function DiaryForm({
       <button
         onClick={handleSubmit}
         disabled={loading}
-        className="primary-button"
-        style={{ marginTop: 18, width: '100%', minHeight: 54, fontSize: '16px' }}
+        className="submit-button"
+        style={{ marginTop: 18 }}
       >
-        {loading ? '投稿中...' : '✍️ 日記を投稿する'}
+        {loading ? '投稿中...' : '投稿する'}
       </button>
     </section>
   )

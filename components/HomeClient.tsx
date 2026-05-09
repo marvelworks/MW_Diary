@@ -60,7 +60,6 @@ export default function HomeClient({ currentUser }: { currentUser: CurrentUser }
     <>
       <header className="topbar">
         <div className="topbar-inner">
-          <div className="topbar-spacer" />
           <h1 className="topbar-title">ここだけのハナシ</h1>
           <div className="profile-menu" ref={menuRef}>
             <button
@@ -144,19 +143,7 @@ export default function HomeClient({ currentUser }: { currentUser: CurrentUser }
         />
       )}
 
-      <section className="minimal-intro">
-        <div>
-          <p className="eyebrow" style={{ marginBottom: 8 }}>
-            private diary
-          </p>
-          <h2 className="minimal-heading">{profile.name}さんの交換日記</h2>
-          <p className="minimal-copy">
-            今日は短くても大丈夫。写真だけでも、ひとことでも、ここだけの話として残していけます。
-          </p>
-        </div>
-      </section>
-
-      <DiaryForm userName={profile.name} onPostSuccess={handlePostSuccess} />
+      <DiaryForm onPostSuccess={handlePostSuccess} />
       <DiaryList userName={profile.name} refreshTrigger={refreshTrigger} />
       </main>
     </>
