@@ -5,8 +5,13 @@ import DiaryForm from '@/components/DiaryForm'
 import DiaryList from '@/components/DiaryList'
 import NameSetup from '@/components/NameSetup'
 import type { CurrentUser } from '@/lib/auth'
+import { supabase } from '@/lib/supabase'
 
 type ThemeMode = 'light' | 'dark'
+type LatestEntrySummary = {
+  author_name: string
+  created_at: string
+}
 
 export default function HomeClient({ currentUser }: { currentUser: CurrentUser }) {
   const [profile, setProfile] = useState(currentUser)
@@ -14,6 +19,7 @@ export default function HomeClient({ currentUser }: { currentUser: CurrentUser }
   const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [latestEntry, setLatestEntry] = useState<LatestEntrySummary | null>(null)
   const [theme, setTheme] = useState<ThemeMode>(() => {
     if (typeof window === 'undefined') {
       return 'light'
@@ -25,6 +31,25 @@ export default function HomeClient({ currentUser }: { currentUser: CurrentUser }
   useEffect(() => {
     document.documentElement.dataset.theme = theme
   }, [theme])
+
+  useEffect(() => {
+    const fetchLatestEntry = async () => {
+      const { data } = await supabase
+        .from('entries')
+        .select('author_name, created_at')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      if (data) {
+        setLatestEntry(data as LatestEntrySummary)
+      } else {
+        setLatestEntry(null)
+      }
+    }
+
+    fetchLatestEntry()
+  }, [refreshTrigger])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -131,6 +156,17 @@ export default function HomeClient({ currentUser }: { currentUser: CurrentUser }
       </header>
 
       <main className="app-shell app-shell-minimal section-stack">
+      {latestEntry && (
+        <section className="turn-section">
+          <p className="section-title">NEXT TURN</p>
+          <p className="turn-meta">
+            最新の投稿: {new Date(latestEntry.created_at).toLocaleString('ja-JP')}
+          </p>
+          <p className="turn-text">
+            次は[{latestEntry.author_name}]さんの番です!
+          </p>
+        </section>
+      )}
 
       {showNameSetup && (
         <NameSetup

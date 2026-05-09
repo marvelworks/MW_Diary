@@ -154,11 +154,6 @@ export default function DiaryList({
     setLoadingId(null)
   }
 
-  const refreshEntries = async () => {
-    const { data } = await supabase.from('entries').select('*').order('created_at', { ascending: false })
-    if (data) setEntries(data as Entry[])
-  }
-
   const deleteEntry = async (id: string) => {
     if (!window.confirm('この投稿を削除してもよいですか？')) return
     setLoadingId(id)
@@ -233,30 +228,7 @@ export default function DiaryList({
 
   return (
     <section className="section-stack">
-      {entries.length > 0 && (
-        <div className="turn-card">
-          <div>
-            <p className="eyebrow" style={{ marginBottom: 6 }}>
-              Next Turn
-            </p>
-            <p style={{ margin: 0, fontSize: '22px', fontWeight: 800 }}>
-              次は {entries[0].author_name} さんの番です！
-            </p>
-            <p className="section-copy" style={{ marginTop: 6 }}>
-              最新の投稿: {new Date(entries[0].created_at).toLocaleString('ja-JP')}
-            </p>
-          </div>
-          <button onClick={refreshEntries} className="ghost-button">
-            最新情報を取得
-          </button>
-        </div>
-      )}
-
       {error && <p className="message-error">{error}</p>}
-
-      <div className="list-heading">
-        <h2 className="section-title">TIMELINE</h2>
-      </div>
 
       <div className="entry-list">
         {entries.map((entry) => {
@@ -280,12 +252,12 @@ export default function DiaryList({
                       className="entry-avatar"
                     />
                   ) : (
-                    <div className="avatar-badge" style={{ width: 44, height: 44, borderRadius: 16, fontSize: 16 }}>
+                    <div className="avatar-badge avatar-badge-small">
                       {entry.author_name.slice(0, 1)}
                     </div>
                   )}
                   <div>
-                    <p style={{ fontWeight: 700, margin: 0 }}>{entry.author_name}</p>
+                    <p className="entry-author-name">{entry.author_name}</p>
                     <p className="entry-meta">{new Date(entry.created_at).toLocaleString('ja-JP')}</p>
                   </div>
                 </div>
@@ -322,7 +294,7 @@ export default function DiaryList({
                 </>
               )}
 
-              <div style={{ marginTop: 18 }}>
+              <div className="entry-reactions-block">
                 <div className="reaction-row">
                   {Object.entries(likeCounts).map(([emoji, count]) => {
                     const hasLiked = likes.some(
@@ -356,7 +328,7 @@ export default function DiaryList({
                 {activeReactionEntryId === entry.id && (
                   <div className="reaction-panel">
                     <div>
-                      <p className="eyebrow" style={{ marginBottom: 8 }}>
+                      <p className="eyebrow eyebrow-panel">
                         Add Reaction
                       </p>
                       <div className="reaction-grid">

@@ -98,13 +98,13 @@ export default function DiaryForm({
         />
       </div>
 
-      <div className="toolbar-row" style={{ marginTop: 14 }}>
+      <div className="toolbar-row toolbar-row-offset">
         <input
           ref={fileInputRef}
           type="file"
           accept="image/*"
           onChange={handleFileChange}
-          style={{ display: 'none' }}
+          className="hidden-file-input"
         />
         <button
           type="button"
@@ -171,13 +171,12 @@ export default function DiaryForm({
         </>
       )}
 
-      {error && <p className="message-error" style={{ marginTop: 12 }}>{error}</p>}
+      {error && <p className="message-error message-error-offset">{error}</p>}
 
       <button
         onClick={handleSubmit}
         disabled={loading}
         className="submit-button"
-        style={{ marginTop: 18 }}
       >
         {loading ? '投稿中...' : '投稿する'}
       </button>
