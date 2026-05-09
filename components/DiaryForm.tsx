@@ -14,6 +14,7 @@ export default function DiaryForm({
   const [body, setBody] = useState('')
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [previewOpen, setPreviewOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -73,6 +74,7 @@ export default function DiaryForm({
     setBody('')
     setImageFile(null)
     setImagePreview(null)
+    setPreviewOpen(false)
     onPostSuccess?.()
     setLoading(false)
   }
@@ -137,9 +139,45 @@ export default function DiaryForm({
       </div>
 
       {imagePreview && (
-        <div className="file-preview">
-          <img src={imagePreview} alt="プレビュー" />
-        </div>
+        <>
+          <div className="file-preview-card">
+            <button
+              type="button"
+              className="image-button"
+              onClick={() => setPreviewOpen(true)}
+              aria-label="添付画像を拡大表示"
+            >
+              <div className="file-preview">
+                <img src={imagePreview} alt="プレビュー" />
+              </div>
+            </button>
+            <p className="image-caption">タップして全体を見る</p>
+          </div>
+
+          {previewOpen && (
+            <div
+              className="image-modal-backdrop"
+              role="dialog"
+              aria-modal="true"
+              onClick={() => setPreviewOpen(false)}
+            >
+              <button
+                type="button"
+                className="image-modal-close"
+                onClick={() => setPreviewOpen(false)}
+                aria-label="画像モーダルを閉じる"
+              >
+                ×
+              </button>
+              <div
+                className="image-modal-content"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <img src={imagePreview} alt="プレビュー拡大" className="image-modal-img" />
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {error && <p className="message-error" style={{ marginTop: 12 }}>{error}</p>}

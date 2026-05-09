@@ -42,6 +42,7 @@ export default function DiaryList({
   const [customEmojiByEntry, setCustomEmojiByEntry] = useState<Record<string, string>>({})
   const [userAvatars, setUserAvatars] = useState<Record<string, string>>({})
   const [error, setError] = useState<string | null>(null)
+  const [modalImageUrl, setModalImageUrl] = useState<string | null>(null)
   const quickReactions = ['👍', '❤️', '😊', '🎉', '😢', '😮', '🔥', '💯']
 
   useEffect(() => {
@@ -263,57 +264,69 @@ export default function DiaryList({
 
       <div className="entry-list">
         {entries.map((entry) => {
-        const isOwn = entry.author_name === userName
-        const isEditing = editingId === entry.id
-        const isLoading = loadingId === entry.id
-        const entryLikes = likes.filter((like) => like.entry_id === entry.id)
-        const likeCounts = entryLikes.reduce((acc, like) => {
-          acc[like.emoji] = (acc[like.emoji] || 0) + 1
-          return acc
-        }, {} as Record<string, number>)
+          const isOwn = entry.author_name === userName
+          const isEditing = editingId === entry.id
+          const isLoading = loadingId === entry.id
+          const entryLikes = likes.filter((like) => like.entry_id === entry.id)
+          const likeCounts = entryLikes.reduce((acc, like) => {
+            acc[like.emoji] = (acc[like.emoji] || 0) + 1
+            return acc
+          }, {} as Record<string, number>)
 
           return (
             <article key={entry.id} className="entry-card">
-            <div className="entry-header">
-              <div className="entry-author">
-                {userAvatars[entry.author_name] ? (
-                  <img
-                    src={userAvatars[entry.author_name]}
-                    alt={`${entry.author_name}のアバター`}
-                    className="entry-avatar"
-                  />
-                ) : (
-                  <div className="avatar-badge" style={{ width: 44, height: 44, borderRadius: 16, fontSize: 16 }}>
-                    {entry.author_name.slice(0, 1)}
+              <div className="entry-header">
+                <div className="entry-author">
+                  {userAvatars[entry.author_name] ? (
+                    <img
+                      src={userAvatars[entry.author_name]}
+                      alt={`${entry.author_name}のアバター`}
+                      className="entry-avatar"
+                    />
+                  ) : (
+                    <div className="avatar-badge" style={{ width: 44, height: 44, borderRadius: 16, fontSize: 16 }}>
+                      {entry.author_name.slice(0, 1)}
+                    </div>
+                  )}
+                  <div>
+                    <p style={{ fontWeight: 700, margin: 0 }}>{entry.author_name}</p>
+                    <p className="entry-meta">{new Date(entry.created_at).toLocaleString('ja-JP')}</p>
                   </div>
-                )}
-                <div>
-                  <p style={{ fontWeight: 700, margin: 0 }}>{entry.author_name}</p>
-                  <p className="entry-meta">{new Date(entry.created_at).toLocaleString('ja-JP')}</p>
                 </div>
+
+                {isOwn ? <span className="tag-pill">あなたの投稿</span> : null}
               </div>
 
-              {isOwn ? <span className="tag-pill">あなたの投稿</span> : null}
-            </div>
+              {isEditing ? (
+                <div className="section-stack">
+                  <input
+                    value={editingTitle}
+                    onChange={(event) => setEditingTitle(event.target.value)}
+                    placeholder="タイトル（任意）"
+                  />
+                  <textarea value={editingBody} onChange={(event) => setEditingBody(event.target.value)} rows={5} />
+                </div>
+              ) : (
+                <>
+                  {entry.title && <h3 className="entry-title">{entry.title}</h3>}
+                  <p className="entry-body">{entry.body}</p>
+                  {entry.image_url && (
+                    <div className="entry-image-card">
+                      <button
+                        type="button"
+                        className="image-button"
+                        onClick={() => setModalImageUrl(entry.image_url!)}
+                        aria-label="投稿画像を拡大表示"
+                      >
+                        <img src={entry.image_url} alt="添付画像" className="entry-image" />
+                      </button>
+                      <p className="image-caption">タップして拡大</p>
+                    </div>
+                  )}
+                </>
+              )}
 
-            {isEditing ? (
-              <div className="section-stack">
-                <input
-                  value={editingTitle}
-                  onChange={(event) => setEditingTitle(event.target.value)}
-                  placeholder="タイトル（任意）"
-                />
-                <textarea value={editingBody} onChange={(event) => setEditingBody(event.target.value)} rows={5} />
-              </div>
-            ) : (
-              <>
-                {entry.title && <h3 className="entry-title">{entry.title}</h3>}
-                <p className="entry-body">{entry.body}</p>
-                {entry.image_url && <img src={entry.image_url} alt="添付画像" className="entry-image" />}
-              </>
-            )}
-
-            <div style={{ marginTop: 18 }}>
+              <div style={{ marginTop: 18 }}>
                 <div className="reaction-row">
                   {Object.entries(likeCounts).map(([emoji, count]) => {
                     const hasLiked = likes.some(
@@ -344,52 +357,52 @@ export default function DiaryList({
                   </button>
                 </div>
 
-              {activeReactionEntryId === entry.id && (
-                <div className="reaction-panel">
-                  <div>
-                    <p className="eyebrow" style={{ marginBottom: 8 }}>
-                      Add Reaction
-                    </p>
-                    <div className="reaction-grid">
-                      {quickReactions.map((emoji) => (
-                        <button
-                          key={emoji}
-                          type="button"
-                          className="reaction-chip"
-                          onClick={() => {
-                            toggleLike(entry.id, emoji)
-                            setActiveReactionEntryId(null)
-                          }}
-                        >
-                          {emoji}
-                        </button>
-                      ))}
+                {activeReactionEntryId === entry.id && (
+                  <div className="reaction-panel">
+                    <div>
+                      <p className="eyebrow" style={{ marginBottom: 8 }}>
+                        Add Reaction
+                      </p>
+                      <div className="reaction-grid">
+                        {quickReactions.map((emoji) => (
+                          <button
+                            key={emoji}
+                            type="button"
+                            className="reaction-chip"
+                            onClick={() => {
+                              toggleLike(entry.id, emoji)
+                              setActiveReactionEntryId(null)
+                            }}
+                          >
+                            {emoji}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="toolbar-row">
+                      <input
+                        type="text"
+                        value={customEmoji(entry.id)}
+                        onChange={(event) => setCustomEmoji(entry.id, event.target.value)}
+                        placeholder="好きな絵文字を入力"
+                        maxLength={2}
+                      />
+                      <button
+                        className="primary-button"
+                        onClick={() => {
+                          toggleLike(entry.id, customEmoji(entry.id))
+                          setCustomEmoji(entry.id, '')
+                          setActiveReactionEntryId(null)
+                        }}
+                        disabled={!customEmoji(entry.id).trim()}
+                      >
+                        追加
+                      </button>
                     </div>
                   </div>
-
-                  <div className="toolbar-row">
-                    <input
-                      type="text"
-                      value={customEmoji(entry.id)}
-                      onChange={(event) => setCustomEmoji(entry.id, event.target.value)}
-                      placeholder="好きな絵文字を入力"
-                      maxLength={2}
-                    />
-                    <button
-                      className="primary-button"
-                      onClick={() => {
-                        toggleLike(entry.id, customEmoji(entry.id))
-                        setCustomEmoji(entry.id, '')
-                        setActiveReactionEntryId(null)
-                      }}
-                      disabled={!customEmoji(entry.id).trim()}
-                    >
-                      追加
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
 
               {isOwn && (
                 <div className="entry-actions">
@@ -418,6 +431,27 @@ export default function DiaryList({
           )
         })}
       </div>
+
+      {modalImageUrl && (
+        <div
+          className="image-modal-backdrop"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setModalImageUrl(null)}
+        >
+          <button
+            type="button"
+            className="image-modal-close"
+            onClick={() => setModalImageUrl(null)}
+            aria-label="画像モーダルを閉じる"
+          >
+            ×
+          </button>
+          <div className="image-modal-content" onClick={(event) => event.stopPropagation()}>
+            <img src={modalImageUrl} alt="投稿画像拡大" className="image-modal-img" />
+          </div>
+        </div>
+      )}
     </section>
   )
 }

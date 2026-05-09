@@ -304,18 +304,40 @@ textarea {
 }
 
 .file-preview {
-  margin-top: 14px;
   border-radius: 22px;
   border: 1px solid var(--border);
-  overflow: hidden;
   background: rgba(255, 255, 255, 0.82);
+  display: grid;
+  place-items: center;
+  padding: 14px;
 }
 
 .file-preview img {
   display: block;
+  width: auto;
+  max-width: min(100%, 420px);
+  max-height: 260px;
+  object-fit: contain;
+  border-radius: 16px;
+}
+
+.file-preview-card,
+.entry-image-card {
+  display: grid;
+  gap: 8px;
+}
+
+.image-button {
+  cursor: pointer;
+  display: block;
   width: 100%;
-  max-height: 320px;
-  object-fit: cover;
+}
+
+.image-caption {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
 }
 
 .entry-list {
@@ -378,12 +400,17 @@ textarea {
 }
 
 .entry-image {
-  width: 100%;
-  max-height: 360px;
-  object-fit: cover;
+  display: block;
+  width: auto;
+  max-width: min(100%, 420px);
+  max-height: 260px;
+  object-fit: contain;
   border-radius: 20px;
   margin-top: 16px;
   border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.7);
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .reaction-row {
@@ -447,6 +474,50 @@ textarea {
   color: #a13232;
   font-size: 14px;
   font-weight: 600;
+}
+
+.image-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(14, 10, 10, 0.78);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.image-modal-content {
+  max-width: min(100vw - 32px, 920px);
+  max-height: min(100vh - 64px, 920px);
+  display: grid;
+  place-items: center;
+}
+
+.image-modal-img {
+  display: block;
+  max-width: 100%;
+  max-height: min(100vh - 64px, 920px);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 24px;
+  background: rgba(25, 18, 18, 0.82);
+}
+
+.image-modal-close {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  color: white;
+  cursor: pointer;
+  font-size: 26px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
 }
 
 .theme-switch {
